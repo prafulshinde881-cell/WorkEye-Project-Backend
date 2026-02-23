@@ -61,6 +61,18 @@ if DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
     print(f"[DB CONVERT] Converted postgres:// to postgresql://")
 
+# FIX: Handle incomplete Render DATABASE_URL (sometimes truncated to missing domain suffix)
+# Render environment variables can be truncated, so check if URL is obviously incomplete
+url_too_short = len(DATABASE_URL) < 120  # Complete URL should be ~140+ chars
+missing_domain = 'dpg-' in DATABASE_URL and 'singapore-postgres.render.com' not in DATABASE_URL
+missing_db_name = not DATABASE_URL.endswith('/work_eye_db') and 'dpg-' in DATABASE_URL
+url_incomplete = url_too_short or missing_domain or missing_db_name
+
+if url_incomplete:
+    print(f"[DB WARN] DATABASE_URL appears incomplete (len={len(DATABASE_URL)}), using hardcoded URL")
+    DATABASE_URL = EXTERNAL_DB_URL
+    print(f"[DB OK] Using complete hardcoded database URL")
+
 # Log connection info (hide password)
 if '@' in DATABASE_URL:
     connection_info = DATABASE_URL.split('@')[1].split('/')[0]
