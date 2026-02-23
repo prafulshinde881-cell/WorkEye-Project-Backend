@@ -209,7 +209,7 @@ def signup():
             # COMMIT the transaction to save to database
             conn.commit()
             
-            print(f"✅ Signup successful - Company: {company['id']}, Admin: {admin['id']}")
+            print(f"[OK] Signup successful - Company: {company['id']}, Admin: {admin['id']}")
             
             # Generate JWT token
             token = generate_token(admin['id'], company['id'], email)
@@ -232,7 +232,7 @@ def signup():
             }), 201
     
     except Exception as e:
-        print(f"❌ Signup error: {e}")
+        print(f"[ERROR] Signup error: {e}")
         return jsonify({
             'success': False,
             'error': 'Internal server error during signup'
@@ -318,7 +318,7 @@ def login():
             # COMMIT the transaction
             conn.commit()
             
-            print(f"✅ Login successful - Admin: {admin['id']}, Company: {company['id']}")
+            print(f"[OK] Login successful - Admin: {admin['id']}, Company: {company['id']}")
             
             # Generate JWT token
             token = generate_token(admin['id'], company['id'], email)
@@ -341,7 +341,7 @@ def login():
             }), 200
     
     except Exception as e:
-        print(f"❌ Login error: {e}")
+        print(f"[ERROR] Login error: {e}")
         return jsonify({
             'success': False,
             'error': 'Internal server error during login'
@@ -430,7 +430,7 @@ def validate_token_route():
             }), 200
     
     except Exception as e:
-        print(f"❌ Token validation error: {e}")
+        print(f"[ERROR] Token validation error: {e}")
         return jsonify({
             'success': False,
             'error': 'Internal server error'

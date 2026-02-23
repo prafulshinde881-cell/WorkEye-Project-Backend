@@ -1,12 +1,12 @@
 """
 DB.PY - PostgreSQL Database Connection for WorkEye
 ===================================================
-✅ Uses external Render PostgreSQL database
-✅ Proper SSL connection configuration
-✅ Connection pooling with psycopg2
-✅ IST (Indian Standard Time) timezone support
-✅ Compatible with all backend routes
-✅ FIXED: Complete external database URL with full hostname
+[OK] Uses external Render PostgreSQL database
+[OK] Proper SSL connection configuration
+[OK] Connection pooling with psycopg2
+[OK] IST (Indian Standard Time) timezone support
+[OK] Compatible with all backend routes
+[OK] FIXED: Complete external database URL with full hostname
 """
 
 import os
@@ -52,21 +52,21 @@ DATABASE_URL = os.environ.get(
     )
 )
 
-print(f"🔍 DEBUG: Environment DATABASE_URL exists: {bool(os.environ.get('DATABASE_URL'))}")
-print(f"🔍 DEBUG: Environment INTERNAL_DATABASE_URL exists: {bool(os.environ.get('INTERNAL_DATABASE_URL'))}")
-print(f"🔍 DEBUG: Using DATABASE_URL: {DATABASE_URL[:60] if DATABASE_URL else 'NONE'}...")
+print(f"[DB DEBUG] Environment DATABASE_URL exists: {bool(os.environ.get('DATABASE_URL'))}")
+print(f"[DB DEBUG] Environment INTERNAL_DATABASE_URL exists: {bool(os.environ.get('INTERNAL_DATABASE_URL'))}")
+print(f"[DB DEBUG] Using DATABASE_URL: {DATABASE_URL[:60] if DATABASE_URL else 'NONE'}...")
 
 # Render uses postgres://, PostgreSQL requires postgresql://
 if DATABASE_URL.startswith('postgres://'):
     DATABASE_URL = DATABASE_URL.replace('postgres://', 'postgresql://', 1)
-    print(f"🔄 Converted postgres:// to postgresql://")
+    print(f"[DB CONVERT] Converted postgres:// to postgresql://")
 
 # Log connection info (hide password)
 if '@' in DATABASE_URL:
     connection_info = DATABASE_URL.split('@')[1].split('/')[0]
-    print(f"🔗 Connecting to: {connection_info}")
+    print(f"[DB LINK] Connecting to: {connection_info}")
 else:
-    print(f"🔗 Connecting to: database")
+    print(f"[DB LINK] Connecting to: database")
 
 # ============================================================================
 # CONNECTION POOL (for better performance)
@@ -79,17 +79,17 @@ def initialize_connection_pool():
     global connection_pool
     
     # Debug: Print what we're trying to connect to
-    print(f"🔍 DATABASE_URL length: {len(DATABASE_URL)}")
-    print(f"🔍 DATABASE_URL starts with: {DATABASE_URL[:50] if len(DATABASE_URL) > 50 else DATABASE_URL}")
+    print(f"[DB DEBUG] DATABASE_URL length: {len(DATABASE_URL)}")
+    print(f"[DB DEBUG] DATABASE_URL starts with: {DATABASE_URL[:50] if len(DATABASE_URL) > 50 else DATABASE_URL}")
     
     # Verify DATABASE_URL is set
     if not DATABASE_URL or 'postgresql://' not in DATABASE_URL:
-        print(f"❌ CRITICAL: DATABASE_URL is not properly set!")
-        print(f"❌ DATABASE_URL value: {DATABASE_URL}")
+        print(f"[DB ERROR] CRITICAL: DATABASE_URL is not properly set!")
+        print(f"[DB ERROR] DATABASE_URL value: {DATABASE_URL}")
         return False
     
     try:
-        print(f"📡 Initializing connection pool...")
+        print(f"[DB INIT] Initializing connection pool...")
         
         connection_pool = psycopg2.pool.SimpleConnectionPool(
             1,  # minimum connections
@@ -99,11 +99,11 @@ def initialize_connection_pool():
             sslmode='require',  # Required for Render PostgreSQL
             connect_timeout=10  # 10 second timeout
         )
-        print("✅ Database connection pool initialized successfully")
+        print("[DB OK] Database connection pool initialized successfully")
         return True
     except Exception as e:
-        print(f"❌ Failed to create connection pool: {e}")
-        print(f"❌ Attempting direct connection test...")
+        print(f"[DB ERROR] Failed to create connection pool: {e}")
+        print(f"[DB ERROR] Attempting direct connection test...")
         try:
             # Try direct connection to verify
             test_conn = psycopg2.connect(
@@ -112,7 +112,7 @@ def initialize_connection_pool():
                 connect_timeout=10
             )
             test_conn.close()
-            print("✅ Direct connection test succeeded!")
+            print("[DB OK] Direct connection test succeeded!")
             # Try pool again
             connection_pool = psycopg2.pool.SimpleConnectionPool(
                 1, 20, DATABASE_URL,
@@ -120,14 +120,52 @@ def initialize_connection_pool():
                 sslmode='require',
                 connect_timeout=10
             )
-            print("✅ Pool created on second attempt")
+            print("[DB OK] Pool created on second attempt")
             return True
         except Exception as e2:
-            print(f"❌ Direct connection also failed: {e2}")
+            print(f"[DB ERROR] Direct connection also failed: {e2}")
             import traceback
             traceback.print_exc()
             return False
 
+
+
+
+
+
+# def initialize_connection_pool():
+#     global connection_pool
+
+#     try:
+#         print("📡 Initializing connection pool...")
+
+#         connection_pool = psycopg2.pool.SimpleConnectionPool(
+#             1,
+#             20,
+#             dsn=DATABASE_URL,          # ✅ use dsn=
+#             cursor_factory=RealDictCursor,
+#             sslmode="require"
+#         )
+
+#         print("✅ Database connection pool initialized successfully")
+#         return True
+
+#     except Exception as e:
+#         print(f"❌ Failed to create connection pool: {e}")
+
+#         try:
+#             print("🔄 Trying direct connection test...")
+#             test_conn = psycopg2.connect(
+#                 dsn=DATABASE_URL,
+#                 cursor_factory=RealDictCursor,
+#                 sslmode="require"
+#             )
+#             test_conn.close()
+#             print("✅ Direct connection successful")
+#             return True
+#         except Exception as e2:
+#             print(f"❌ Direct connection also failed: {e2}")
+#             return False
 # ============================================================================
 # CONNECTION MANAGEMENT
 # ============================================================================
@@ -217,7 +255,7 @@ def init_db():
     cur = conn.cursor()
     
     try:
-        print("🔧 Checking database schema...")
+        print("[DB CHECK] Checking database schema...")
         
         # Check if companies table exists
         cur.execute("""
@@ -229,7 +267,7 @@ def init_db():
         companies_exists = cur.fetchone()['exists']
         
         if not companies_exists:
-            print("⚠️  Database tables not found. Please run init_db.py first.")
+            print("[DB WARN] Database tables not found. Please run init_db.py first.")
             conn.close()
             return False
         
@@ -241,7 +279,7 @@ def init_db():
             ORDER BY ordinal_position
         """)
         company_columns = [row['column_name'] for row in cur.fetchall()]
-        print(f"✅ Companies table columns: {', '.join(company_columns)}")
+        print(f"[DB OK] Companies table columns: {', '.join(company_columns)}")
         
         # Check admin_users table
         cur.execute("""
@@ -260,9 +298,9 @@ def init_db():
                 ORDER BY ordinal_position
             """)
             admin_columns = [row['column_name'] for row in cur.fetchall()]
-            print(f"✅ Admin_users table columns: {', '.join(admin_columns)}")
+            print(f"[DB OK] Admin_users table columns: {', '.join(admin_columns)}")
         else:
-            print("⚠️  admin_users table not found - admin login may not work")
+            print("[DB WARN] admin_users table not found - admin login may not work")
         
         # Check members table
         cur.execute("""
@@ -281,7 +319,7 @@ def init_db():
                 ORDER BY ordinal_position
             """)
             member_columns = [row['column_name'] for row in cur.fetchall()]
-            print(f"✅ Members table columns: {', '.join(member_columns)}")
+            print(f"[DB OK] Members table columns: {', '.join(member_columns)}")
         
         # List all tables
         cur.execute("""
@@ -291,15 +329,15 @@ def init_db():
             ORDER BY table_name
         """)
         all_tables = [row['table_name'] for row in cur.fetchall()]
-        print(f"📊 Database tables ({len(all_tables)}): {', '.join(all_tables[:10])}{'...' if len(all_tables) > 10 else ''}")
+        print(f"[DB TABLES] Database tables ({len(all_tables)}): {', '.join(all_tables[:10])}{'...' if len(all_tables) > 10 else ''}")
         
         conn.commit()
-        print("✅ Database schema verified")
+        print("[DB OK] Database schema verified")
         return True
         
     except Exception as e:
         conn.rollback()
-        print(f"❌ Database initialization error: {e}")
+        print(f"[DB ERROR] Database initialization error: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -329,7 +367,7 @@ def check_db_health():
             return True
         return False
     except Exception as e:
-        print(f"❌ Database health check failed: {e}")
+        print(f"[DB ERROR] Database health check failed: {e}")
         return False
 
 
@@ -389,13 +427,13 @@ def fetch_all(query, params=None):
 # ============================================================================
 
 # Initialize connection pool when module is imported
-print("🚀 Initializing database connection...")
+print("[DB INIT] Initializing database connection...")
 if initialize_connection_pool():
-    print("🎉 Database ready!")
+    print("[DB OK] Database ready!")
     # Verify schema
     init_db()
 else:
-    print("⚠️  Database connection pool failed, will use direct connections")
+    print("[DB WARN] Database connection pool failed, will use direct connections")
 
 # ============================================================================
 # EXPORTS

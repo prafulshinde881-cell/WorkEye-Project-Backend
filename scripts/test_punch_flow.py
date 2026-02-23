@@ -21,7 +21,7 @@ company_id = row['company_id']
 print('Using:', member_id, email, device, 'company', company_id)
 
 # Punch in via attendance endpoint
-backend = os.getenv('BACKEND_URL', 'http://127.0.0.1:10000')
+backend = os.getenv('BACKEND_URL', 'https://workeye-project-backend.onrender.com')
 print('Using backend:', backend)
 pi_resp = requests.post(backend + '/api/attendance/punch-in', json={'member_email': email, 'company_id': company_id}, timeout=10)
 print('Punch-in status:', pi_resp.status_code, pi_resp.text)

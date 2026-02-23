@@ -10,7 +10,7 @@ if not admins:
 admin = admins[0]
 print('Using admin:', admin)
 token = generate_admin_jwt(admin['id'], admin['company_id'], admin['email'], 'access')
-url = os.getenv('BACKEND_URL', 'http://127.0.0.1:10000') + '/api/dashboard/stats'
+url = os.getenv('BACKEND_URL', '') + '/api/dashboard/stats'
 print('Fetching', url)
 resp = requests.get(url, headers={'Authorization': f'Bearer {token}'}, timeout=10)
 print('Status:', resp.status_code)

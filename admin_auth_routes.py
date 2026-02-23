@@ -1,15 +1,15 @@
 """
 ADMIN_AUTH_ROUTES.PY - Production Multi-Tenant Authentication
 ================================================================
-✅ Multi-tenant isolation (every query filters by company_id)
-✅ Secure password hashing with bcrypt
-✅ JWT authentication with company_id embedded
-✅ Rate limiting to prevent brute-force attacks
-✅ Comprehensive error handling and logging
-✅ Input validation and sanitization
-✅ Token refresh mechanism
-✅ Secure session management
-✅ FIXED: Uses admin_users table (matches actual DB schema)
+[OK] Multi-tenant isolation (every query filters by company_id)
+[OK] Secure password hashing with bcrypt
+[OK] JWT authentication with company_id embedded
+[OK] Rate limiting to prevent brute-force attacks
+[OK] Comprehensive error handling and logging
+[OK] Input validation and sanitization
+[OK] Token refresh mechanism
+[OK] Secure session management
+[OK] FIXED: Uses admin_users table (matches actual DB schema)
 """
 
 from flask import Blueprint, request, jsonify
@@ -57,7 +57,7 @@ def verify_password(password: str, hashed: str) -> bool:
     try:
         return bcrypt.checkpw(password.encode('utf-8'), hashed.encode('utf-8'))
     except Exception as e:
-        print(f"❌ Password verification error: {e}")
+        print(f"[ERROR] Password verification error: {e}")
         return False
 
 def validate_email(email: str) -> bool:
@@ -171,12 +171,12 @@ def require_admin_auth(f):
             request.tenant_id = payload['company_id']
             request.admin_email = payload['email']
             
-            print(f"✅ Authenticated: admin_id={request.admin_id}, company_id={request.company_id}")
+            print(f"[OK] Authenticated: admin_id={request.admin_id}, company_id={request.company_id}")
             
         except ValueError as e:
             return jsonify({'error': str(e)}), 401
         except Exception as e:
-            print(f"❌ Auth error: {e}")
+            print(f"[ERROR] Auth error: {e}")
             return jsonify({'error': 'Authentication failed'}), 401
         
         return f(*args, **kwargs)
@@ -288,7 +288,7 @@ def admin_signup():
             access_token = generate_admin_jwt(admin['id'], company_id, email, 'access')
             refresh_token = generate_admin_jwt(admin['id'], company_id, email, 'refresh')
             
-            print(f"✅ Signup successful: email={email}, company_id={company_id}")
+            print(f"[OK] Signup successful: email={email}, company_id={company_id}")
             
             return jsonify({
                 'success': True,
@@ -310,7 +310,7 @@ def admin_signup():
             }), 201
             
     except Exception as e:
-        print(f"❌ Admin signup error: {e}")
+        print(f"[ERROR] Admin signup error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error during signup'}), 500
@@ -359,17 +359,17 @@ def admin_login():
             admin = cur.fetchone()
             
             if not admin:
-                print(f"❌ Login failed: User not found in admin_users for email: {email}")
+                print(f"[ERROR] Login failed: User not found in admin_users for email: {email}")
                 return jsonify({'error': 'Invalid credentials'}), 401
             
             # Verify password
             if not verify_password(password, admin['password_hash']):
-                print(f"❌ Login failed: Invalid password for email: {email}")
+                print(f"[ERROR] Login failed: Invalid password for email: {email}")
                 return jsonify({'error': 'Invalid credentials'}), 401
             
             # Check if user is active
             if not admin['is_active']:
-                print(f"❌ Login failed: Inactive account for email: {email}")
+                print(f"[ERROR] Login failed: Inactive account for email: {email}")
                 return jsonify({'error': 'Account is disabled'}), 403
             
             company_id = admin['company_id']
@@ -386,7 +386,7 @@ def admin_login():
             company = cur.fetchone()
             
             if not company or not company['is_active']:
-                print(f"❌ Login failed: Company not found or inactive for company_id: {company_id}")
+                print(f"[ERROR] Login failed: Company not found or inactive for company_id: {company_id}")
                 return jsonify({'error': 'Company account is inactive'}), 403
             
             # Update last login timestamp
@@ -399,7 +399,7 @@ def admin_login():
             access_token = generate_admin_jwt(admin['id'], company['id'], email, 'access')
             refresh_token = generate_admin_jwt(admin['id'], company['id'], email, 'refresh')
             
-            print(f"✅ Login successful: email={email}, company_id={company['id']}, admin_id={admin['id']}")
+            print(f"[OK] Login successful: email={email}, company_id={company['id']}, admin_id={admin['id']}")
             
             return jsonify({
                 'success': True,
@@ -421,7 +421,7 @@ def admin_login():
             }), 200
             
     except Exception as e:
-        print(f"❌ Admin login error: {e}")
+        print(f"[ERROR] Admin login error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error during login'}), 500
@@ -501,7 +501,7 @@ def validate_admin_token():
             }), 200
             
     except Exception as e:
-        print(f"❌ Token validation error: {e}")
+        print(f"[ERROR] Token validation error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error'}), 500
@@ -539,7 +539,7 @@ def refresh_admin_token():
         }), 200
         
     except Exception as e:
-        print(f"❌ Token refresh error: {e}")
+        print(f"[ERROR] Token refresh error: {e}")
         return jsonify({'error': 'Token refresh failed'}), 500
 
 # ============================================================================
@@ -628,7 +628,7 @@ def delete_admin_account():
             
             conn.commit()
             
-            print(f"✅ Account deletion completed for company_id={company_id}")
+            print(f"[OK] Account deletion completed for company_id={company_id}")
             
             return jsonify({
                 'success': True,
@@ -645,7 +645,7 @@ def delete_admin_account():
             }), 200
             
     except Exception as e:
-        print(f"❌ Delete account error: {e}")
+        print(f"[ERROR] Delete account error: {e}")
         import traceback
         traceback.print_exc()
         return jsonify({'error': 'Internal server error during account deletion'}), 500

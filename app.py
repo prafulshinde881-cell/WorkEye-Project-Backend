@@ -1,12 +1,12 @@
 """
 APP.PY - Secure Multi-Tenant Flask Application with SPA Support
 ================================================================
-✅ Complete separation of admin and tracker auth
-✅ Strict company_id isolation
-✅ No auto-registration
-✅ SPA fallback for client-side routing
-✅ FIXED: API routes take priority over SPA fallback
-✅ Configuration management routes added
+[OK] Complete separation of admin and tracker auth
+[OK] Strict company_id isolation
+[OK] No auto-registration
+[OK] SPA fallback for client-side routing
+[OK] FIXED: API routes take priority over SPA fallback
+[OK] Configuration management routes added
 """
 
 import os
@@ -52,7 +52,7 @@ socketio = SocketIO(
 
 from db import check_db_health
 
-print("🔒 Multi-Tenant Secure Backend Starting...")
+print("[SYSTEM] Multi-Tenant Secure Backend Starting...")
 
 # ======================================================================
 # BLUEPRINTS - ALL ROUTES (REGISTER BEFORE SPA FALLBACK!)
@@ -61,9 +61,9 @@ print("🔒 Multi-Tenant Secure Backend Starting...")
 def load_blueprint(blueprint, name):
     try:
         app.register_blueprint(blueprint)
-        print(f"✅ {name} routes loaded")
+        print(f"[OK] {name} routes loaded")
     except Exception as e:
-        print(f"⚠️ {name} routes failed: {e}")
+        print(f"[WARN] {name} routes failed: {e}")
 
 # Admin routes (dashboard authentication + management)
 from admin_auth_routes import admin_auth_bp
