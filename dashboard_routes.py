@@ -188,16 +188,19 @@ def get_dashboard_stats():
                 print(f"   Last activity: {member['last_activity_at']}")
                 print(f"   Punched in: {member['is_punched_in']}")
                 
-                # Calculate real-time status
-                # status, seconds_ago = calculate_member_status(
-                #     member['last_heartbeat_at'], 
-                #     member['last_activity_at']
-                # )
-                # ✅ Use DB status (single source of truth)
+                # Calculate real-time status (use DB value)
                 status = member['status']
+
+                # Determine seconds since last activity for display purposes
                 seconds_ago = None
+                if member['last_activity_at']:
+                    now_ist = datetime.now(IST)
+                    last_act_ist = convert_to_ist(member['last_activity_at'])
+                    seconds_ago = int((now_ist - last_act_ist).total_seconds())
 
                 print(f"   ➡️ Calculated status: {status}")
+                if seconds_ago is not None:
+                    print(f"   Seconds since last activity: {seconds_ago}")
                 
                 # Apply status filter
                 if status_filter and status != status_filter:
