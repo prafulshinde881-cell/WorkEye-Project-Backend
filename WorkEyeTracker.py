@@ -55,7 +55,7 @@ CONFIG = {
     'log_file': None,
     
     # Backend configuration (EMBEDDED BY ADMIN DOWNLOAD)
-    'backend_url': 'https://workeye-project-backend.onrender.com',  # Will be replaced by backend
+    'backend_url': 'http://127.0.0.1:10000',  # Will be replaced by backend
     'tracker_token': 'MTk6aEZLWm1Xd1VOMVlRRjE3cmlNbmpPUE84R3BVSG9QVEh5M0pqOWlHQ18xbw==',  # Will be replaced by backend
     'company_id': 19,     # Will be replaced by backend
     
@@ -595,14 +595,14 @@ def upload_data():
         if not CONFIG.get('member_email') or not CONFIG.get('tracker_token'):
             return False
         
-        # Screenshot timing
-        if (datetime.now() - STATE.last_screenshot_time).total_seconds() >= CONFIG['screenshot_interval']:
-            screenshot = capture_screenshot()
-            if screenshot:
-                STATE.latest_screenshot_b64 = screenshot
-            STATE.last_screenshot_time = datetime.now()
-        
-        # Get payload with exact backend field names
+        # The ScreenshotCapture thread is responsible for taking screenshots at the
+        # configured interval and updating STATE.latest_screenshot_b64 /
+        # STATE.last_screenshot_time.  We no longer attempt to capture here because
+        # doing so in upload_data caused intervals to drift and screenshots to be
+        # taken whenever the upload thread happened to run.  That resulted in the
+        # “random one‑minute” behaviour reported earlier.
+        #
+        # Simply include whatever screenshot (if any) has already been captured.
         payload = STATE.get_payload(include_screenshot=STATE.latest_screenshot_b64 is not None)
         
         url = f"{CONFIG['backend_url']}/tracker/upload"

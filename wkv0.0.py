@@ -541,14 +541,8 @@ def upload_data():
         if not CONFIG.get('member_email') or not CONFIG.get('tracker_token'):
             return False
         
-        # Screenshot timing
-        if (datetime.now() - STATE.last_screenshot_time).total_seconds() >= CONFIG['screenshot_interval']:
-            screenshot = capture_screenshot()
-            if screenshot:
-                STATE.latest_screenshot_b64 = screenshot
-            STATE.last_screenshot_time = datetime.now()
-        
-        # Get payload with exact backend field names
+        # Screenshot capture is handled by the ScreenshotCapture thread;
+        # avoid doing it during upload to prevent unpredictable intervals.
         payload = STATE.get_payload(include_screenshot=STATE.latest_screenshot_b64 is not None)
         
         url = f"{CONFIG['backend_url']}/tracker/upload"
