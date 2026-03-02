@@ -18,7 +18,7 @@ print('Using admin:', admin_id, email, 'company:', company_id)
 token = generate_admin_jwt(admin_id, company_id, email, 'access')
 print('Generated token (first 80 chars):', token[:80])
 
-url = os.getenv('BACKEND_URL', 'https://workeye-project-backend.onrender.com') + '/api/attendance/members'
+url = os.getenv('BACKEND_URL', 'http://127.0.0.1:10000') + '/api/attendance/members'
 print('Fetching:', url)
 resp = requests.get(url, headers={'Authorization': f'Bearer {token}'}, timeout=10)
 print('Status:', resp.status_code)

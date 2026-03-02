@@ -10,11 +10,19 @@ APP.PY - Secure Multi-Tenant Flask Application with SPA Support
 """
 
 import os
+import sys
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 from flask_socketio import SocketIO, join_room, emit
 from dotenv import load_dotenv
 from attendance_routes import attendance_bp
+
+# Ensure console uses utf-8 so unicode prints don't crash on Windows
+if hasattr(sys.stdout, 'reconfigure'):
+    try:
+        sys.stdout.reconfigure(encoding='utf-8')
+    except Exception:
+        pass
 
 
 load_dotenv()

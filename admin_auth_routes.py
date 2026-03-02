@@ -25,6 +25,8 @@ from db import get_db
 from collections import defaultdict
 import time
 
+import requests
+
 admin_auth_bp = Blueprint('admin_auth', __name__)
 
 # ============================================================================
@@ -47,6 +49,56 @@ login_attempts = defaultdict(list)
 # SECURITY UTILITIES
 # ============================================================================
 
+def check_license_active(email: str) -> tuple[bool, str]:
+    try:
+        product_id = "69589e3fe70228ef3c25f26c"
+        url = f"https://lisence-system.onrender.com/api/external/actve-license/{email}?productId={product_id}"
+
+        response = requests.get(url, timeout=5)
+
+        print("License API Status:", response.status_code)
+        print("License API Response:", response.text)
+
+        if response.status_code != 200:
+            return False, "Unable to verify license"
+
+        data = response.json()
+        print("Parsed JSON:", data)
+
+        return True, ""
+
+    except Exception as e:
+        print(f"[ERROR] License check failed: {e}")
+        return False, "License verification failed"
+    """
+    Call external license API and verify if license is active
+    Returns (True, "") if active
+    Returns (False, "reason") if not active
+    """
+    try:
+        product_id = "69589e3fe70228ef3c25f26c"
+        url = f"https://lisence-system.onrender.com/api/external/actve-license/{email}?productId={product_id}"
+
+        response = requests.get(url, timeout=5)
+
+        if response.status_code != 200:
+            return False, "Unable to verify license"
+
+        data = response.json()
+
+        # Adjust this according to your API response structure
+        if not data.get("success"):
+            return False, "License not active"
+
+        if not data.get("isActive"):
+            return False, "License not active"
+
+        return True, ""
+
+    except Exception as e:
+        print(f"[ERROR] License check failed: {e}")
+        return False, "License verification failed"
+    
 def hash_password(password: str) -> str:
     """Hash password with bcrypt (12 rounds)"""
     salt = bcrypt.gensalt(rounds=12)
@@ -358,9 +410,20 @@ def admin_login():
             )
             admin = cur.fetchone()
             
+            # if not admin:
+            #     print(f"[ERROR] Login failed: User not found in admin_users for email: {email}")
+            #     return jsonify({'error': 'Invalid credentials'}), 401
+            
             if not admin:
-                print(f"[ERROR] Login failed: User not found in admin_users for email: {email}")
-                return jsonify({'error': 'Invalid credentials'}), 401
+             return jsonify({'error': 'Invalid credentials'}), 401
+
+            # ==========================
+# LICENSE CHECK BEFORE LOGIN
+# ==========================
+            license_ok, license_msg = check_license_active(email)
+            if not license_ok:
+              print(f"[ERROR] License not active for email: {email}")
+              return jsonify({'error': 'License not active'}), 403
             
             # Verify password
             if not verify_password(password, admin['password_hash']):
