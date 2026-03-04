@@ -36,20 +36,9 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "change-this-in-prod")
 
 CORS(
     app,
-    resources={
-        r"/*": {
-            "origins": "*",
-            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-            "allow_headers": [
-                "Content-Type",
-                "Authorization",
-                "X-Tracker-Token",
-                "x-api-key"
-            ]
-        }
-    }
+    resources={r"/*": {"origins": "*"}},
+    supports_credentials=True
 )
-
 @app.after_request
 def apply_cors_headers(response):
     response.headers["Access-Control-Allow-Origin"] = "*"
