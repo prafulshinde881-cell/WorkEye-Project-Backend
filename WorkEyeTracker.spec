@@ -5,14 +5,13 @@ a = Analysis(
     ['WorkEyeTracker.py'],
     pathex=[],
     binaries=[],
-    datas=[('.env', '.')],
-    hiddenimports=['psutil', 'pytz', 'PIL', 'win32gui', 'win32process', 'win32api'],
+    datas=[],
+    hiddenimports=[],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
     excludes=[],
     noarchive=False,
-    optimize=0,
 )
 pyz = PYZ(a.pure)
 
@@ -35,5 +34,4 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='NONE',
 )
