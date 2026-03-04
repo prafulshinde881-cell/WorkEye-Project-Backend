@@ -50,6 +50,12 @@ CORS(
     }
 )
 
+@app.after_request
+def apply_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Tracker-Token, x-api-key"
+    response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, DELETE, OPTIONS"
+    return response
 # ======================================================================
 # SOCKET.IO SETUP
 # ======================================================================
