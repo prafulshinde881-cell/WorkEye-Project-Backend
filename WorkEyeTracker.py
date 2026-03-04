@@ -1002,23 +1002,27 @@ class MinimalUI:
         
         # PUNCH OUT button (large and prominent)
         button_frame = tk.Frame(self.punch_out_frame, bg=self.bg_primary)
-        button_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
+        # don't expand the frame, let the button size itself
+        button_frame.pack(pady=20)  # small vertical spacing only
         
         self.punch_out_btn = tk.Button(
             button_frame,
             text="⏹  PUNCH OUT",
-            font=('Segoe UI', 14, 'bold'),
+            font=('Segoe UI', 10, 'bold'),  # smaller font
             bg=self.accent_danger,
             fg=self.text_primary,
             relief='flat',
             bd=0,
-            height=4,
+            height=1,  # minimal height
+            padx=10,
+            pady=5,
             command=self.handle_punch_out,
             cursor='hand2',
             activebackground='#dc2626',
             activeforeground=self.text_primary
         )
-        self.punch_out_btn.pack(fill=tk.BOTH, expand=True)
+        # pack without fill/expand so button is only as big as its content
+        self.punch_out_btn.pack(pady=5)
         
         # Bind enter key
         self.root.bind('<Return>', lambda e: self.handle_punch_in() if not STATE.is_tracking else None)

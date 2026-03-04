@@ -1,0 +1,36 @@
+# Python virtual environment
+venv/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environment variables
+.env
+
+# Editor directories and files
+.vscode/
+.idea/
+*.swp
+
+# Misc
+*.log
+
+# Database files
+*.sqlite3
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Ignore test artefacts
+test_upload.py
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+
+

@@ -1431,6 +1431,7 @@ import tempfile
 from functools import wraps
 from datetime import datetime, timezone
 import pytz
+from cloudinary_helper import upload_image_bytes
 
 
 
@@ -2445,6 +2446,20 @@ def tracker_upload():
                         result = cur.fetchone()
                         screenshot_id = result['id'] if result else None
                         print(f"🔍 Debug: screenshot_id={screenshot_id}, company_id={company_id}, member_id={member_id}")
+                        # Attempt Cloudinary upload if credentials are present
+                        try:
+                            if os.getenv('CLOUDINARY_CLOUD_NAME') and os.getenv('CLOUDINARY_API_KEY') and screenshot_id:
+                                folder = f"workeye/company_{company_id}/member_{member_id}"
+                                public_id = f"screenshot_{screenshot_id}"
+                                upload_result = upload_image_bytes(webp_binary, folder=folder, public_id=public_id)
+                                cloud_url = upload_result.get('secure_url') or upload_result.get('url')
+                                if cloud_url and screenshot_id:
+                                    cur.execute("UPDATE screenshots SET screenshot_url = %s WHERE id = %s", (cloud_url, screenshot_id))
+                                    print(f"✅ Uploaded screenshot to Cloudinary: {cloud_url}")
+                        except Exception as cu_e:
+                            print(f"⚠️ Cloudinary upload failed: {cu_e}")
+                            import traceback
+                            traceback.print_exc()
                     except Exception as db_e:
                         # log and continue; upload should not fail because of screenshot
                         print(f"⚠️ Screenshot DB insert failed: {db_e}")

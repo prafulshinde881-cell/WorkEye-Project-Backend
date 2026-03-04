@@ -36,4 +36,7 @@ python-dateutil==2.8.2
 Pillow==10.1.0
 pytz==2024.1
 
+# Cloudinary image hosting
+cloudinary==1.30.0
+
 
